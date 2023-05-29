@@ -92,5 +92,5 @@ while True:
         send_message("코인을 전량 매수 하였습니다")
         hold = True
         
-    print(f"현재시간: {now} 현재가: {price} 목표가: {target} 종가예측: {predicted_close_price} 보유상태: {hold} 동작상태: {op_mode}")
+    #print(f"현재시간: {now} 현재가: {price} 목표가: {target} 종가예측: {predicted_close_price} 보유상태: {hold} 동작상태: {op_mode}")
     time.sleep(1)
