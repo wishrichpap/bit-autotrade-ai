@@ -2,8 +2,16 @@ import pyupbit
 import time
 import datetime
 import schedule
+import requests
 from prophet import Prophet
 
+def send_message(msg):
+    """디스코드 메세지 전송"""
+    now = datetime.datetime.now()
+    message = {"content": f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {str(msg)}"}
+    requests.post(DISCORD_WEBHOOK_URL, data=message)
+    print(message)
+    
 def cal_target(ticker):
     df = pyupbit.get_ohlcv(ticker, "day")
     yesterday = df.iloc[-2]
@@ -42,6 +50,7 @@ f = open("upbit.txt")
 lines = f.readlines()
 access = lines[0].strip()   #access key
 secret = lines[1].strip()   #secret key
+DISCORD_WEBHOOK_URL = lines[2].strip()  #디스코드 웹훅 key
 f.close()
 upbit = pyupbit.Upbit(access, secret) # class instance, object
 
@@ -49,6 +58,8 @@ upbit = pyupbit.Upbit(access, secret) # class instance, object
 target = cal_target("KRW-BTC")
 op_mode = False
 hold = False
+
+send_message("코인 자동매매 프로그램을 시작합니다")
                   
 while True:
     now = datetime.datetime.now()
@@ -58,6 +69,7 @@ while True:
         if op_mode is True and hold is True:
             btc_balance = upbit.get_balance("KRW-BTC")
             upbit.sell_market_order("KRW-BTC", btc_balance)
+            send_message("코인을 전량 매도 하였습니다")
             hold = False
             
         op_mode = False
@@ -77,6 +89,7 @@ while True:
         krw_balance = upbit.get_balance("KRW")
         upbit.buy_market_order("KRW-BTC", krw_balance)
         #upbit.buy_market_order("KRW-BTC", krw_balance * 0.5) # 보유금액에 50% 만 구매
+        send_message("코인을 전량 매수 하였습니다")
         hold = True
         
     print(f"현재시간: {now} 현재가: {price} 목표가: {target} 종가예측: {predicted_close_price} 보유상태: {hold} 동작상태: {op_mode}")
